@@ -6,6 +6,9 @@
 #include <fstream>
 #include <cstdlib>
 #include <iomanip>
+#include <memory.h>
+
+using namespace std;
 
 int ns=0;//label长度
 
@@ -253,8 +256,6 @@ struct headat{
     uint32_t trackoft[16];  
 }head;
 
-using namespace std;
-
 static string rmexception(string s){
     size_t pos=s.find_last_of('.');
     if(pos>0&&pos!=string::npos){
@@ -279,7 +280,7 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
         getline(nf,lis);
         if(lis[lis.size()-1]==':'){
             //label作为key,定义地址作为值
-            in_pair=lb.insert(pair<string,uint32_t>(lis,of.tellp()|0x8000000));
+            in_pair=lb.insert(pair<string,uint32_t>(lis.substr(0,lis.size()-1),of.tellp()|0x8000000));
             if(in_pair.second==false){
                 throw "key:\""+lis+" -> "+to_string(of.tellp())+"\"放入map失败!";
             }
@@ -289,7 +290,7 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                 case 'W'://wait
                 nus=lis.substr(8,2);
                 bit8=strtol(nus.c_str(),NULL,10);
-                bit8=waitime(bit8)+0x80;
+                bit8=waitime[bit8]+0x80;
                 if(bit8>0xb0){
                     throw "数据: \""+lis+"\"异常!";
                 }
@@ -306,11 +307,12 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                 break;
 
                 case 'P':
-                if(lis[7]=='A'){
+                ch=lis[8];
+                if(ch=='A'){
                     of<<(char)0xb3;//pattern play
-                }else if(lis[8]=='E'){
+                }else if(ch=='E'){
                     of<<(char)0xb4;//pattern end
-                }else if(lis[8]=='R'){
+                }else if(ch=='R'){
                     of<<(char)0xba;//priority
                     throw "数据: \""+lis+"\"初见!";
                 }else {
@@ -335,10 +337,8 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                 if(pos<1||pos==string::npos){
                     throw "数据: \""+lis+"\"异常!";
                 }
-                nus=lis.substr(pos+1,ns);
-                cout<<"tempo所在的标签为: "<<nus<<endl;
-                cin.get();
-                map<string,uint8_t>::iterator it;
+                nus=lis.substr(pos+1,ns+4);
+                // map<string,uint8_t>::iterator it;
                 it=sdef.find(nus);
                 if(it==sdef.end()){
                     throw "数据: \""+lis+"\"异常!";
@@ -350,8 +350,6 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                 }
                 bit8=strtol((lis.substr(pos+1)).c_str(),NULL,10);
                 bit32/=bit8;
-                cout<<"temp="<<int(bit32)<<endl;
-                cin.get();
                 if(bit32>0xff){
                     throw "数据: \""+lis+"\"异常!";
                 }
@@ -360,9 +358,9 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
 
                 case 'K'://key shift
                 of<<(char)0xbc;
-                nus=lis.substr(15,ns);
-                cout<<"keysh后的标签为"<<nus<<endl;
-                map<string,uint8_t>::iterator it;
+                nus=lis.substr(15,ns+4);
+                // cout<<"keysh后的标签为"<<nus<<endl;
+                // map<string,uint8_t>::iterator it;
                 it=sdef.find(nus);
                 if(it!=sdef.end()){
                     pos=lis.find_last_of('+');
@@ -372,30 +370,46 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                 }else{
                     throw "数据: \""+lis+"\"异常!";
                 }
-                cin.get();
                 break;
 
-                case '  ':
+                case '	':
                 ch=lis[8];
                 switch(ch){
                     case 'V':
-                    ch=lis[9];
-                    if(ch=='I'){//voice # (相当于实际的base note)
-                        of<<(char)0xbd;
-                    }else if(ch=='L'){//volume
-                        of<<(char)0xbe;
-                    }else{
-                        throw "数据: \""+lis+"\"异常!";
-                    }
+                    
                     pos=lis.find_last_of(',');
                     if(pos<1||pos==string::npos){
                         throw "数据: \""+lis+"\"异常!";
                     }
-                    bit8=strtol((lis.subst(pos+1)).c_str(),NULL,10);
-                    if(bit>7F){
+                    bit8=strtol((lis.substr(pos+2,3)).c_str(),NULL,10);
+                    if(bit8>0x7F){
                         throw "数据: \""+lis+"\"异常!";
                     }
-                    of<<(char)bit8;
+                    ch=lis[10];
+                    if(ch=='I'){//voice # (相当于实际的base note)
+                        of<<(char)0xbd;
+                        of<<(char)bit8;
+                    }else if(ch=='L'){//volume
+                        of<<(char)0xbe;
+                        pos=lis.find_last_of('/');
+                        if(pos<1||pos==string::npos){
+                            throw "数据: \""+lis+"\"异常!";
+                        }
+                        nus=lis.substr(pos-4-ns,ns+4);
+                        it=sdef.find(nus);
+                        if(it==sdef.end()){
+                            throw "key:\""+nus+"\" 找不到对应的值!";
+                        }
+                        bit32=it->second*bit8;
+                        bit8=bit32/0x7F;
+                        of<<(char)bit8;    
+                    }else{
+                        throw "数据: \""+lis+"\"异常!";
+                    }
+
+
+
+                    
                     break;
 
                     case 'P'://panpot (c_v+??)
@@ -428,7 +442,7 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                         ch=lis[pos+5];
                         if(ch=='+'){
                             bit8+=64;
-                        }else if(ch='-'){
+                        }else if(ch=='-'){
                             bit8=64-bit8;
                         }else{
                             throw "数据: \""+lis+"\"异常!";
@@ -461,7 +475,7 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                     break;
 
                     case 'M':
-                    ch=lis[11];
+                    ch=lis[14];
                     if(ch==','){//modulation depth
                         of<<(char)0xc4;
                     }else if(ch=='T'){//modulation type
@@ -472,11 +486,6 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                     pos=lis.find_last_of(',');
                     bit8=strtol((lis.substr(pos+2)).c_str(),NULL,10);
                     of<<(char)bit8;  
-                    break;
-
-                    case 'T'://micro tuning(c_v+??)
-                    of<<(char)0xc8;
-                    throw "数据: \""+lis+"\"初见!";
                     break;
 
                     case 'X'://extend command ***lib
@@ -502,7 +511,7 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                     case 'T'://Tie
                     if(ch=='N'){
                         bit8=strtol((lis.substr(9,2)).c_str(),NULL,10);
-                        bit32=waitime[bit8]+0xce;
+                        bit32=waitime[bit8]+0xcf;
                         if(bit32>0xff){
                             throw "数据: \""+lis+"\"异常!";
                         }
@@ -510,7 +519,17 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                     }else if(ch=='E'){
                         of<<(char)0xce;
                     }else if(ch=='T'){
-                        of<<(char)0xcf;
+                        ch=lis[9];
+                        if(ch=='I'){
+                            of<<(char)0xcf;
+                        }else if(ch=='U'){
+                            of<<(char)0xc8;
+                            throw "数据: \""+lis+"\"初见!";
+                        }else{
+                            throw "数据: \""+lis+"\"异常!";
+                        }   
+                    }else{
+                        throw "数据: \""+lis+"\"异常!";
                     }
                     bit8=lis.size();
                     if(bit8<15){
@@ -521,7 +540,7 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                         nus=nus.substr(0,3);
                     }
                     it=kmap.find(nus);
-                    if(it==kmap.end(){
+                    if(it==kmap.end()){
                         throw "key:\""+nus+"\" 找不到对应的值!";
                     }
                     of<<(char)it->second;
@@ -536,21 +555,51 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                     if(lis.size()<15){
                         throw "数据: \""+lis+"\"异常!";
                     }
-                    nus=lis.substr(16,4);
-                    if(nus[3]==' '){
-                        nus=nus.substr(0,3);
+                    if(lis[16]=='c'){
+                        bit8=strtol((lis.substr(20)).c_str(),NULL,10);
+                        if(lis[19]=='+'){
+                            bit8+=64;
+                        }else if(lis[19]=='-'){
+                            bit8=64-bit8;
+                        }else{
+                            throw "数据: \""+lis+"\"异常!";
+                        }
+                        of<<(char)bit8;
+                    }else{
+                        nus=lis.substr(16,4);
+                        pos=lis.find_last_of('*');
+                        if(pos<1||pos==string::npos){
+                            if(nus[3]==' '){
+                                nus=nus.substr(0,3);
+                            }
+                            it=kmap.find(nus);
+                            if(it!=kmap.end()){//字母开头的键号
+                                of<<(char)it->second;
+                                pos=lis.find_last_of(',');
+                                if(pos<1||pos==string::npos){
+                                    break;
+                                }
+                                bit8=strtol((lis.substr(pos+3)).c_str(),NULL,10);
+                                of<<(char)bit8;
+                            }else{
+                                throw "数据: \""+lis+"\"异常!";
+                            }
+                        }else{
+                            bit8=strtol(nus.c_str(),NULL,10);
+                            pos=lis.find_last_of('/');
+                            if(pos<1||pos==string::npos){
+                                throw "数据: \""+lis+"\"异常!1";
+                            }
+                            nus=lis.substr(pos-ns-4,ns+4);
+                            it=sdef.find(nus);
+                            if(it==sdef.end()){
+                                throw "数据: \""+lis+"\"异常!2";
+                            }
+                            bit32=bit8*it->second;
+                            bit8=bit32/0x7f;
+                            of<<(char)bit8;
+                        }
                     }
-                    it=kmap.find(nus);
-                    if(it==kmap.end()){
-                        throw "key:\""+nus+"\" 找不到对应的值!";
-                    }
-                    of<<(char)it->second;
-                    pos=lis.find_last_of(',');
-                    if(pos<1||pos==string::npos){
-                        break;
-                    }
-                    bit8=strtol((lis.substr(pos+3)).c_str(),NULL,10);
-                    of<<(char)bit8;
                     break;
 
                     default:
@@ -558,17 +607,19 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                     break;
 
                 }
+                break;
+
                 default:
                 throw "数据: \""+lis+"\"异常!";
                 break;
             }
         /*打印4字节地址处*/
         }else if(lis[2]=='.'){//.word
-            lis=lis.substr(7);
+            lis=lis.substr(8);
             map<string,uint32_t>::iterator itw;
             itw=lb.find(lis);
             if(itw!=lb.end()){
-                of.write((char*)itw->second,4); 
+                of.write((char*)&itw->second,4); 
             }else{
                 throw "找不到label: \""+lis+"\"对应的坐标!";
             }
@@ -585,7 +636,14 @@ static string get_label(string s){
 }
 int main(int argc,char* const argv[]){
     ios::sync_with_stdio(false);//关闭流同步
-    
+
+
+	if(argc==1){
+		cerr<<"s(mid)file to binary v1.0(23:00 2020/5/30) by: XXXXXX-Diwa"<<endl;
+		cerr<<"程序名 文件名(s)..etc"<<endl;
+		exit(0);
+	}
+
     try{
         string ls,fn;//读取一行和文件名label
         /**
@@ -629,7 +687,7 @@ int main(int argc,char* const argv[]){
                  throw "文件: \""+outfn+".bin\"无法创建!";
             }
             /*预设定和写入头数据*/
-            fill(&head,sizeof(head),0);
+            memset(&head,0,sizeof(head));
             head.table=0x8000008;
             head.songroup=0x0;
             head.trackn=0;
@@ -649,19 +707,13 @@ int main(int argc,char* const argv[]){
                 if(c=='m'||c=='p'||c=='r'||c=='k'||c=='t'||c=='e'||c=='c'){
                     size_t po=ls.find_last_of(',');
                     uint16_t mvl=strtol(ls.substr(po+2).c_str(),NULL,10);
-                    if(mvl==0||mvl>0x7F){
-                        throw string("mvl的值异常!");
-                    }else{
-                        ls=ls.substr(6,ns);
-                        cout<<ls<<endl;
-                        cin.get();
-                        def_pair=song_def.insert(pair<string,uint8_t>(ls,mvl));
-                        if(!def_pair.second){
-                            throw "key:\""+ls+" -> "+to_string(mvl)+"\"放入map失败!";
-                        }
+                    ls=ls.substr(6,ns+4);
+                    def_pair=song_def.insert(pair<string,uint8_t>(ls,mvl));
+                    if(!def_pair.second){
+                        throw "key:\""+ls+" -> "+to_string(mvl)+"\"放入map失败!";
                     }
                 }
-                if(song_def.size==7){
+                if(song_def.size()==7){
                     break;
                 }
                 
@@ -669,13 +721,13 @@ int main(int argc,char* const argv[]){
             do{
                 getline(inf,ls);
                 //找到每个track的开始
-                if(ls[18]=='T'&&ls[19]=='r'){
+                if(ls.size()>19&&ls[18]=='T'&&ls[19]=='r'){
                     getline(inf,ls);
                     getline(inf,ls);
-                    if(ls[ls.size()-1]==':'){
+                    if(ls[ls.size()-1]!=':'){
                         throw string(".s文件数据异常!");
                     }
-                    trackoft.push_back(outf.tellp());//保存track地址
+                    trackoft.push_back(outf.tellp());//保存当前track首地址
                     cur_track_data_write(inf,outf,blabel,song_def,key_map);
                 }
                 ls=ls.substr(0,ls.size()-1);
@@ -697,7 +749,7 @@ int main(int argc,char* const argv[]){
             if(head.trackn!=trackoft.size()){
                 throw "轨数和记录的不符!记录: "+to_string(trackoft.size())+"文件尾定义: "+to_string(head.trackn);
             }
-            outf.tellp(0,ios::beg);
+            outf.seekp(0,ios::beg);
             for(uint8_t i=0;i<trackoft.size();++i){
                 head.trackoft[i]=trackoft[i]|0x8000000;
             }
@@ -708,6 +760,7 @@ int main(int argc,char* const argv[]){
         }
     }catch(string es){
         cerr<<"异常: "<<es<<endl;
+        // cerr<<e.what()<<endl;
         cin.get();
         exit(1);
     }
