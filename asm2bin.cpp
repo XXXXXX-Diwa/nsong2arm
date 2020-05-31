@@ -11,6 +11,7 @@
 using namespace std;
 
 int ns=0;//label长度
+int cur_line=0;//行数
 
 const uint8_t waitime[]=//兼用于NOTE 表 省的搞两列了
 {
@@ -278,6 +279,7 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
     
     while(!nf.eof()){
         getline(nf,lis);
+        ++cur_line;
         if(lis[lis.size()-1]==':'){
             //label作为key,定义地址作为值
             in_pair=lb.insert(pair<string,uint32_t>(lis.substr(0,lis.size()-1),of.tellp()|0x8000000));
@@ -703,6 +705,7 @@ int main(int argc,char* const argv[]){
             pair<map<string,uint8_t>::iterator,bool> def_pair;
             do{
                 getline(inf,ls);
+                ++cur_line;
                 char c=ls[7+ns];
                 if(c=='m'||c=='p'||c=='r'||c=='k'||c=='t'||c=='e'||c=='c'){
                     size_t po=ls.find_last_of(',');
@@ -720,10 +723,12 @@ int main(int argc,char* const argv[]){
             }while(!inf.eof());
             do{
                 getline(inf,ls);
+                ++cur_line;
                 //找到每个track的开始
                 if(ls.size()>19&&ls[18]=='T'&&ls[19]=='r'){
                     getline(inf,ls);
                     getline(inf,ls);
+                    cur_line+=2;
                     if(ls[ls.size()-1]!=':'){
                         throw string(".s文件数据异常!");
                     }
@@ -733,6 +738,7 @@ int main(int argc,char* const argv[]){
                 ls=ls.substr(0,ls.size()-1);
                 if(ls==fn){
                     getline(inf,ls);
+                    cur_line;
                     size_t pon=ls.find_last_of('@');
                     if(ls.substr(pon)!="@ NumTrks"){
                         throw string("未找到track数量信息!");
@@ -759,7 +765,7 @@ int main(int argc,char* const argv[]){
             outf.clear();    
         }
     }catch(string es){
-        cerr<<"异常: "<<es<<endl;
+        cerr<<"错误: 行("<<to_string(cur_line)<<")处  "<<es<<endl;
         // cerr<<e.what()<<endl;
         cin.get();
         exit(1);
