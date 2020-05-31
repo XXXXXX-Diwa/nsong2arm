@@ -362,7 +362,7 @@ public:
                 inf.getline(c,100);
                 outf<<c<<endl;
             }while(!inf.eof());
-            cout<<"文件: \""<<fLabel.c_str()<<".s\"转化完成!"<<endl;
+            cout<<"文件: \""<<fLabel.c_str()<<".s\"转化完成!\n"<<endl;
             inf.close();
             outf.close();
             //最好如此
@@ -373,8 +373,7 @@ public:
     }
 
     ~filego(){
-        cerr<<"全部文件转换完毕!";
-        cin.get();
+        cerr<<"全部文件转换完毕!\n";
     }
 
     string onlyName(string s){

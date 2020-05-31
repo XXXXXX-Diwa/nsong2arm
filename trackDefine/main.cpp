@@ -90,7 +90,7 @@ int main(int argc,char* argv[])
 
     fclose(g_inputFile);
     fclose(g_outputFile);
-    std::printf("asm文件写入完成!");
+    std::printf("asm文件写入完成!\n");
 
     return 0;
 }
