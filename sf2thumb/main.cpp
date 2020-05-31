@@ -20,9 +20,10 @@ vector<string> sampleNames(0,"");//当前sf2文件中导出的样本
 vector<string> g_outTrackFileNames(0,"");
 string g_program_path="";
 vector<string> g_onlyUseSamples;//voice_group仅调用的样本
-
-
-
+//map<uint16_t,uint8_t>atk_map;
+//map<uint16_t,uint8_t>dec_map;
+//map<uint16_t,uint8_t>sus_map;
+//map<uint16_t,uint8_t>rel_map;
 
 int main(int argc,const char** argv)
 {
@@ -52,7 +53,12 @@ int main(int argc,const char** argv)
         fputs("sf2 samples+voice_groups output tool (C) v1.0 2020/5/31 by XXXXXX-Diwa\n",stderr);
         outFileLabel();//定义输出文件标签/名
     }
-
+//    for(uint16_t i=0;i<128;++i){
+//    atk_map.insert(pair<uint16_t,uint8_t>(g_atk_times[i],i));
+//    dec_map.insert(map<uint16_t,uint8_t>::value_type(g_dec_times[i],i));
+//    sus_map[g_sus_times[i]]=i;
+//    rel_map[g_rel_times[i]]=i;
+//    }
     for(uint16_t i=0;i<g_inputFileName.size();i++){
         readKeyInfo(g_inputFileName[i]);//读取文件关键数据
 //        try{
