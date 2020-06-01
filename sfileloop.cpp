@@ -6,8 +6,10 @@
 #include <iomanip>
 #include <algorithm>
 
-
 using namespace std;
+
+int curline=0;
+string stage="";
 
 [[noreturn]]void usage(){
     cerr<<"s(mid)file increase loop v1.0(19:08 2020/5/22) by: XXXXXX-Diwa"<<endl;
@@ -75,9 +77,11 @@ public:
                 usage();
             }
             string s;
+			stage="检查Label阶段";
             char c[100];
             for(int j=0;j<3;j++){
                 inf.getline(c,100);
+				++curline;
             }
             string fLabel=getLabel(c);
             if(fLabel==""){
@@ -94,8 +98,10 @@ public:
             uint16_t n=256;
             vector<uint8_t>stages(0,0);
             /**得出最大stage和最小stage以及轨数stage*/
+			stage="检查最大stage和最小stage阶段";
             do{
                 inf.getline(c,100);
+				++curline;
                 if(c[0]=='@'&&c[1]==' '){
                     s=string(c).substr(2,5);
                     n=strtol(s.c_str(),NULL,10);
@@ -113,9 +119,12 @@ public:
             inf.close();
             inf.clear();
             inf.open(fNames[i].c_str(),ios::in);
+			curline=0;
             /**在最大的stage上得出余时*/
+			stage="最大的stage得出余阶段";
             do{
                 inf.getline(c,100);
+				++curline;
                  if(c[0]=='@'&&c[1]==' '){
                     s=string(c).substr(2,5);
                     n=strtol(s.c_str(),NULL,10);
@@ -123,6 +132,7 @@ public:
                         uint16_t time=0;
                         do{
                             inf.getline(c,100);
+							++curline;
                             if(c[1]=='.'&&c[2]=='b'){
                                 if(c[7]=='W'){
                                     s=string(c).substr(8,10);
@@ -147,12 +157,15 @@ public:
             inf.close();
             inf.clear();
             inf.open(fNames[i].c_str(),ios::in);
+			curline=0;
 			/**探查音量是否要调整*/
 			uint8_t average_vol=0;
 			uint16_t vol_count=0;
+			stage="探查音量是否要调整阶段";
 			do{
 				inf.getline(c,100);
-				if(c[10]=='L'){
+				++curline;
+				if(c[8]=='V'&&c[9]=='O'&&c[10]=='L'){
 					s=string(c).substr(16,18);
 					vol_count+=strtol(s.c_str(),NULL,10);
 					average_vol++;
@@ -162,6 +175,7 @@ public:
 
 			inf.close();
             inf.clear();
+			curline=0;
             inf.open(fNames[i].c_str(),ios::in);
 
             string outfolder=getFilePath(fNames[i])+"\\sfileout";
@@ -174,10 +188,12 @@ public:
             }
 
             /**修改音量的部分*/
+			stage="修改音量阶段";
             uint8_t add_len=(onlyName(fNames[i])).size();
             if(average_vol>80){//平均音量大于80则要调整
                 do{
                     inf.getline(c,100);
+					++curline;
                     if(c[7+add_len]=='m'){
                         s=string(c).substr(12+add_len,14+add_len);
                         if(strtol(s.c_str(),NULL,10)==127){
@@ -196,12 +212,13 @@ public:
 
                 }while(!inf.eof());
             }
-
+			stage="正式转化阶段";
             for(uint16_t k=0;k<stages.size();k++){//轨次循环
                 /**start*/
                 do{
                     bool j_double=false;
                     inf.getline(c,100);
+					++curline;
                     vector<uint8_t>remainder(0,0);
                     if(c[0]=='@'&&c[1]==' '){//stage标志
                         s=string(c).substr(2,5);
@@ -216,6 +233,7 @@ public:
                             if(stages[k]<stage_max){
                                 while(true){
                                     inf.getline(c,100);
+									++curline;
                                     if(c[1]=='.'&&c[2]=='b'){//.byte标记判断
                                         if(c[7]=='W'){//wait标记
                                             s=string(c).substr(8,10);
@@ -297,6 +315,7 @@ public:
                             }else{
                                 while(true){
                                     inf.getline(c,100);
+									++curline;
                                     if(c[1]=='.'&&c[2]=='b'){//.byte标记判断
                                         if(c[7]=='W'){//wait标记
                                             s=string(c).substr(8,10);
@@ -360,6 +379,7 @@ public:
             //打完文件剩下的内容
             do{
                 inf.getline(c,100);
+				++curline;
                 outf<<c<<endl;
             }while(!inf.eof());
             cout<<"文件: \""<<fLabel.c_str()<<".s\"转化完成!\n"<<endl;
@@ -368,6 +388,7 @@ public:
             //最好如此
             inf.clear();
             outf.clear();
+			curline=0;
 
         }
     }
@@ -414,18 +435,25 @@ public:
 };
 int main(int argc,char** argv){
 	ios::sync_with_stdio(false);
-    filego* file;
-    if(argc>1){
-        vector<string>s(0,"");
-        for(int i=1;i<argc;i++){
-            s.push_back(argv[i]);
-        }
-        file=new filego(s);
-    }else{
-        usage();
-    }
-    file->fileInfo();
+	try{
+		filego* file;
+		if(argc>1){
+			vector<string>s(0,"");
+			for(int i=1;i<argc;i++){
+				s.push_back(argv[i]);
+			}
+			file=new filego(s);
+		}else{
+			usage();
+		}
+		file->fileInfo();
 
-    delete file;
+		delete file;
+	}catch(exception &e){
+		cerr<<stage<<": ";
+		cerr<<"第"<<setw(4)<<setfill('0')<<curline<<"行解析出现错误!";
+		cin.get();
+		exit(1);
+	}
     return 0;
 }
