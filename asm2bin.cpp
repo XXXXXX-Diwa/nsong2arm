@@ -557,7 +557,7 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                     if(lis.size()<15){
                         throw "数据: \""+lis+"\"异常!";
                     }
-                    if(lis[16]=='c'){
+                    if(lis[16]=='c'){//.byte c_v
                         bit8=strtol((lis.substr(20)).c_str(),NULL,10);
                         if(lis[19]=='+'){
                             bit8+=64;
@@ -570,36 +570,38 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                     }else{
                         nus=lis.substr(16,4);
                         pos=lis.find_last_of('*');
-                        if(pos<1||pos==string::npos){
+                        if(pos<1||pos==string::npos){//没有'*'的部分
+							pos=lis.find_last_of(',');
+							if(pos<1||pos==string::npos){//没有','的部分
+								bit8=strtol(nus.c_str(),NULL,10);
+								of<<(char)bit8;
+								break;
+							}
                             if(nus[3]==' '){
                                 nus=nus.substr(0,3);
                             }
                             it=kmap.find(nus);
                             if(it!=kmap.end()){//字母开头的键号
                                 of<<(char)it->second;
-                                pos=lis.find_last_of(',');
-                                if(pos<1||pos==string::npos){
-                                    break;
-                                }
                                 bit8=strtol((lis.substr(pos+3)).c_str(),NULL,10);
                                 of<<(char)bit8;
                             }else{
-                                throw "数据: \""+lis+"\"异常!";
+                                throw "数据: \""+lis+"\"异常!11";
                             }
                         }else{
                             bit8=strtol(nus.c_str(),NULL,10);
                             pos=lis.find_last_of('/');
                             if(pos<1||pos==string::npos){
-                                throw "数据: \""+lis+"\"异常!1";
-                            }
-                            nus=lis.substr(pos-ns-4,ns+4);
-                            it=sdef.find(nus);
-                            if(it==sdef.end()){
-                                throw "数据: \""+lis+"\"异常!2";
-                            }
-                            bit32=bit8*it->second;
-                            bit8=bit32/0x7f;
-                            of<<(char)bit8;
+								throw "数据: \""+lis+"\"异常!";
+							}
+							nus=lis.substr(pos-ns-4,ns+4);
+							it=sdef.find(nus);
+							if(it==sdef.end()){
+								throw "数据: \""+lis+"\"异常!";
+							}
+							bit32=bit8*it->second;
+							bit8=bit32/0x7f;
+							of<<(char)bit8;	
                         }
                     }
                     break;
