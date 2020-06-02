@@ -32,7 +32,7 @@ std::string DelExtension(std::string s)
 //    std::fprintf(g_outputFile,".org 0x8760d38\n");
 //}
 
-void writeTrackData()
+void writeTrackData ()
 {
     std::fprintf(g_outputFile,"%s_Track%d:",label.c_str(),g_curTrackNum);
     for(uint32_t d=0;d<0x40000;d++)

@@ -19,13 +19,13 @@ std::uint16_t g_TrackUnknow=0;
 std::uint32_t g_voiceGroupAddress=0;
 std::uint32_t g_trackAddress[16]={0};
 std::uint16_t g_curTrackNum=0;
-std::uint32_t g_trackLoopData[200]={0};//不信会超过这么多...
+std::uint32_t g_trackLoopData[500]={0};//不信会超过这么多...
 std::uint16_t g_curTrackLoopTotal=0;
 
 std::uint16_t g_trackLoopDataNum=0;
 std::uint16_t g_trackLoopDataWriteNum=0;
 
-std::uint32_t g_trackLoopDefine[40]={0};//不信会超过这么多...
+std::uint32_t g_trackLoopDefine[200]={0};//不信会超过这么多...
 std::uint16_t g_trackLoopDefineTotal=0;
 std::uint16_t g_curTrackLoopDefineNum=0;
 std::string inputFileName="";
@@ -79,18 +79,24 @@ int main(int argc,char* argv[])
     g_outputFile=std::fopen(outputFileName.c_str(),"w");
 
 //    writeAsmFileHeader();//编写汇编文件头
-    for(g_curTrackNum = 0;g_curTrackNum<g_TrackTotalNum;g_curTrackNum++)
-    {
-        Seek(g_trackAddress[g_curTrackNum]);
-        recordTrackLoopData();//储存循环数据
-        Seek(g_trackAddress[g_curTrackNum]);
-        writeTrackData();
-    }
+
+        for(g_curTrackNum = 0;g_curTrackNum<g_TrackTotalNum;g_curTrackNum++)
+        {
+            Seek(g_trackAddress[g_curTrackNum]);
+            recordTrackLoopData();//储存循环数据
+            Seek(g_trackAddress[g_curTrackNum]);
+             try{
+                writeTrackData();
+             }catch(std::exception &e){
+        printf("%s",e.what());
+        }
+        }
+
     writeAsmFileend();
 
     fclose(g_inputFile);
     fclose(g_outputFile);
-    std::printf("asm文件写入完成!\n");
+    std::printf("asm文件写入完成!");
 
     return 0;
 }
