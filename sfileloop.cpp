@@ -159,24 +159,24 @@ public:
             inf.open(fNames[i].c_str(),ios::in);
 			curline=0;
 			/**探查音量是否要调整*/
-			uint8_t average_vol=0;
-			uint16_t vol_count=0;
-			stage="探查音量是否要调整阶段";
-			do{
-				inf.getline(c,100);
-				++curline;
-				if(c[8]=='V'&&c[9]=='O'&&c[10]=='L'){
-					s=string(c).substr(16,18);
-					vol_count+=strtol(s.c_str(),NULL,10);
-					average_vol++;
-				}
-			}while(!inf.eof());
-			average_vol=vol_count/average_vol;
+			// uint8_t average_vol=0;
+			// uint16_t vol_count=0;
+			// stage="探查音量是否要调整阶段";
+			// do{
+			// 	inf.getline(c,100);
+			// 	++curline;
+			// 	if(c[8]=='V'&&c[9]=='O'&&c[10]=='L'){
+			// 		s=string(c).substr(16,18);
+			// 		vol_count+=strtol(s.c_str(),NULL,10);
+			// 		average_vol++;
+			// 	}
+			// }while(!inf.eof());
+			// average_vol=vol_count/average_vol;
 
-			inf.close();
-            inf.clear();
-			curline=0;
-            inf.open(fNames[i].c_str(),ios::in);
+			// inf.close();
+            // inf.clear();
+			// curline=0;
+            // inf.open(fNames[i].c_str(),ios::in);
 
             string outfolder=getFilePath(fNames[i])+"\\sfileout";
             mkdir(outfolder.c_str());
@@ -188,30 +188,30 @@ public:
             }
 
             /**修改音量的部分*/
-			stage="修改音量阶段";
-            uint8_t add_len=(onlyName(fNames[i])).size();
-            if(average_vol>80){//平均音量大于80则要调整
-                do{
-                    inf.getline(c,100);
-					++curline;
-                    if(c[7+add_len]=='m'){
-                        s=string(c).substr(12+add_len,14+add_len);
-                        if(strtol(s.c_str(),NULL,10)==127){
-                            s=onlyName(fNames[i]);
-                            outf<<"	.equ	"<<s.c_str()<<"_mvl, 64"<<endl;
-                            break;
-                        }else{
-							outf<<c<<endl;
-						}
-                    }else if(c[0]=='@'&&c[1]=='*'){
-                        outf<<c<<endl;
-                        break;
-                    }else{
-                        outf<<c<<endl;
-                    }
+			// stage="修改音量阶段";
+            // uint8_t add_len=(onlyName(fNames[i])).size();
+            // if(average_vol>80){//平均音量大于80则要调整
+            //     do{
+            //         inf.getline(c,100);
+			// 		++curline;
+            //         if(c[7+add_len]=='m'){
+            //             s=string(c).substr(12+add_len,14+add_len);
+            //             if(strtol(s.c_str(),NULL,10)==127){
+            //                 s=onlyName(fNames[i]);
+            //                 outf<<"	.equ	"<<s.c_str()<<"_mvl, 64"<<endl;
+            //                 break;
+            //             }else{
+			// 				outf<<c<<endl;
+			// 			}
+            //         }else if(c[0]=='@'&&c[1]=='*'){
+            //             outf<<c<<endl;
+            //             break;
+            //         }else{
+            //             outf<<c<<endl;
+            //         }
 
-                }while(!inf.eof());
-            }
+            //     }while(!inf.eof());
+            // }
 			stage="正式转化阶段";
             for(uint16_t k=0;k<stages.size();k++){//轨次循环
                 /**start*/
