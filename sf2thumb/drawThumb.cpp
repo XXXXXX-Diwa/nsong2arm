@@ -307,7 +307,7 @@ void sample_include_file(){
         vector<string> cur_only;//用于记录当前sf2仅仅有用的样本
         fprintf(g_outputFile,";%s.sf2的样本部分-----------------------------\n",
                 onlyFileName(g_inputFileName[i]).c_str());
-        sort(g_allSampleNames[i].begin(),g_allSampleNames[i].end());//对每个sf2用到的样本排序
+        sort(g_allSampleNames[i].begin(),g_allSampleNames[i].end());//对每个sf2的样本排序
         //去掉每个sf2中重复的样本
         g_allSampleNames[i].erase(unique(g_allSampleNames[i].begin(),g_allSampleNames[i].end()),g_allSampleNames[i].end());
 
@@ -327,7 +327,7 @@ void sample_include_file(){
 
             if(sstr.size()!=0&&dichotomy(sstr,0,sstr.size()-1,cur_only[j])!=-1){
                 fprintf(g_outputFile,"\n;crc32label_%s:\t\t\t\n",cur_only[j].c_str());
-                fprintf(g_outputFile,";.import \"%s\"\n\n",cur_only[j].c_str());
+                fprintf(g_outputFile,";.import \"samples\\%s\"\n\n",cur_only[j].c_str());
             }else{
                 fprintf(g_outputFile,"crc32label_%s:\t\t\t",cur_only[j].c_str());
                 fprintf(g_outputFile,";samples %d\n",samplenum);
@@ -337,7 +337,8 @@ void sample_include_file(){
             }
         }
         fputs("\n",g_outputFile);
-        sstr.assign(testr.begin(),testr.end());
+//        sstr.assign(testr.begin(),testr.end());//assign竟然会清空之前的值
+        sstr.insert(sstr.end(),testr.begin(),testr.end());
         sort(sstr.begin(),sstr.end());
     }
     fputs(".close",g_outputFile);
