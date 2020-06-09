@@ -737,6 +737,8 @@ int main(int argc,char* const argv[]){
             /*获取song_def map*/
             map<string,uint8_t> song_def;
             pair<map<string,uint8_t>::iterator,bool> def_pair;
+            getline(inf,ls);
+            getline(inf,ls);//前两行跳过
             do{
                 getline(inf,ls);
                 ++cur_line;
@@ -800,7 +802,7 @@ int main(int argc,char* const argv[]){
         }
     }catch(string es){
         cerr<<"错误: 行("<<to_string(cur_line)<<")处  "<<es<<endl;
-        // cerr<<e.what()<<endl;
+        // cerr<<"行:"<<to_string(cur_line)<<" "<<e.what()<<endl;
         cin.get();
         exit(1);
     }
