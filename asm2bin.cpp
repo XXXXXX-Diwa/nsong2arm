@@ -602,39 +602,6 @@ static void cur_track_data_write(ifstream &nf,ofstream &of,map<string,uint32_t> 
                         } 
                     }else{
                         throw "数据: \""+lis+"\"异常!";
-                        // nus=lis.substr(16,4);
-                        // pos=lis.find_last_of('*');
-                        // if(pos<1||pos==string::npos){//没有'*'的部分 是琴键
-                        //     if(nus[3]==' '){
-                        //         nus=nus.substr(0,3);
-                        //     }
-                        //     it=kmap.find(nus);
-                        //     if(it!=kmap.end()){//字母开头的键号
-                        //         of<<(char)it->second;
-                        //         pos=lis.find_last_of(',');
-                        //         if(pos<1||pos==string::npos){//没有','的部分 琴键后是否还有v(数字)
-                        //             break;
-                        //         }
-                        //         bit8=strtol((lis.substr(pos+3)).c_str(),NULL,10);
-                        //         of<<(char)bit8;
-                        //     }else{
-                        //         throw "数据: \""+lis+"\"异常!11";
-                        //     }
-                        // }else{
-                        //     bit8=strtol(nus.c_str(),NULL,10);
-                        //     pos=lis.find_last_of('/');
-                        //     if(pos<1||pos==string::npos){
-						// 		throw "数据: \""+lis+"\"异常!";
-						// 	}
-						// 	nus=lis.substr(pos-ns-4,ns+4);
-						// 	it=sdef.find(nus);
-						// 	if(it==sdef.end()){
-						// 		throw "数据: \""+lis+"\"异常!";
-						// 	}
-						// 	bit32=bit8*it->second;
-						// 	bit8=bit32/0x7f;
-						// 	of<<(char)bit8;	
-                        // }
                     }
                     break;
 
