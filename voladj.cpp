@@ -34,12 +34,13 @@ static string backups_name(string s){
 }
 
 int main(int argc,char const* argv[]){
-        string curfile="";
-        uint32_t curline=0;
-        if(argc==1){
-            cerr<<"trackdefine_file volume adjust tool v1.0 2020/6/2 (C) by XXXXXX-Diwa"<<endl;
-            exit(0);
-        }
+    std::ios::sync_with_stdio(false);
+    string curfile="";
+    uint32_t curline=0;
+    if(argc==1){
+        cerr<<"trackdefine_file volume adjust tool v1.0 2020/6/2 (C) by XXXXXX-Diwa"<<endl;
+        exit(0);
+    }
     try{
         uint8_t volset=0;
         cout<<"假设当前音量为128,你想要设置为多少(1-255)?"<<endl;
