@@ -67,6 +67,7 @@ class PoseWord{
 		string c;
 		c.resize(8);
 		bool blflag=false;
+		bool evenjump=false;
 		vector<string> poseOffset;
 		uint32_t offset;
 		string cmpstr;
@@ -88,10 +89,18 @@ class PoseWord{
 				}
 				if(ls[19]=='l'){
 					cmpstr=ls.substr(0,8);
+					
 					for(int i=0;i<poseOffset.size();++i){
 						if(cmpstr==poseOffset[i]){
 							ouf<<"\nPose_"<<hex<<setiosflags(ios::uppercase)<<i<<":"<<endl;
+							evenjump=true;
+							ouf<<ls.substr(0,26)<<"@Pose_"<<hex<<setiosflags(ios::uppercase)<<i<<endl;
+							break;
 						}
+					}
+					if(evenjump){
+						evenjump=false;
+						continue;
 					}
 				}
 				ouf<<ls<<endl;
