@@ -75,26 +75,24 @@ class PoseWord{
 			getline(inf,ls);
 			++curline;
 			if(ls.size()<20){
-				throw string("不该有空白行!");
+				break;
 			}
 			
-			if(ls[18]=='b'&&ls[19]=='l'){
+			if(!blflag&&ls[18]=='b'&&ls[19]=='l'){
 				poseNum=0;
 				blflag=true;
 			}
 			
 			if(blflag){
-				if(ls[18]!='b'){
-					break;
-				}
-				if(ls[19]=='l'){
+				if(ls[18]=='b'&&ls[19]=='l'){
 					cmpstr=ls.substr(0,8);
 					
 					for(int i=0;i<poseOffset.size();++i){
 						if(cmpstr==poseOffset[i]){
 							ouf<<"\nPose_"<<hex<<setiosflags(ios::uppercase)<<i<<":"<<endl;
 							evenjump=true;
-							ouf<<ls.substr(0,26)<<"@Pose_"<<hex<<setiosflags(ios::uppercase)<<i<<endl;
+							ouf<<ls.substr(0,26)<<"@Pose_"<<hex<<setiosflags(ios::uppercase)
+							<<i<<"\t\t;"<<ls.substr(26)<<endl;
 							break;
 						}
 					}
@@ -127,7 +125,7 @@ class PoseWord{
 					cin.get();
 					exit(1);
 				}
-				ouf<<"\t.word "<<hex<<setiosflags(ios::uppercase)<<offset<<"\t\t\t;Pose_"<<poseNum<<endl;
+				ouf<<"\t.word 0x0"<<hex<<setiosflags(ios::uppercase)<<offset<<"\t\t\t;Pose_"<<poseNum<<endl;
 				++poseNum;
 			}
 			
