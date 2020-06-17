@@ -163,7 +163,7 @@ int main(int argc,char *const argv[]){
     try{
         OamSuct *os;
         if(argc==1){
-            throw "OAMSuct v1.0 2020/6/16 by XXXXXX-Diwa";
+            throw string("OAMSuct v1.0 2020/6/16 by XXXXXX-Diwa");
         }else if(argc==2){
             os=new OamSuct(argv[1]);
             cout<<"ÇëÊäÈëOAMµØÖ·: ";
