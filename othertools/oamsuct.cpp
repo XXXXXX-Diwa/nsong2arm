@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <fstream>
 #include <vector>
+#include <sstream>
 using namespace std;
 struct OamMain{
     uint32_t oamOffset;
@@ -85,7 +86,15 @@ class OamSuct{
         cin.sync();
         return s;
     }
-
+    string throwErrorOffset(ifstream &ifs){
+        uint32_t byte128;
+        string str;
+        byte128=uint32_t(ifs.tellg())-8;
+        stringstream ss;
+        ss<<hex<<setiosflags(ios::uppercase)<<byte128;
+        ss>>str;
+        throw "错误! 不正常的OAM数据! 地址: "+str; 
+    }
     void SuckOAM(){
         vector<OamMain> om;
         string s=romPath+shortRomName+"_oam_out.asm";
@@ -104,18 +113,12 @@ class OamSuct{
             inf.read((char*)&oammain,8);
             if(oammain.oamOffset!=0){
                 if(oammain.oamOffset>>25!=4||oammain.oamFrames>>8!=0){
-                    s.resize(7);
-                    bit32=uint32_t(inf.tellg())-8;
-                    itoa(bit32,&s[0],16);
-                    throw "错误! 不正常的OAM数据! 地址: "+s; 
+                    throwErrorOffset(inf);
                 }
                 om.push_back(oammain);
             }else{
                 if(oammain.oamFrames!=0){
-                    bit32=uint32_t(inf.tellg())-8;
-                    s.resize(7);
-                    itoa(bit32,&s[0],16);
-                    throw "错误! 不正常的OAM结束数据! 地址: "+s;
+                    throwErrorOffset(inf);
                 }
                 // om.push_back(oammain);//.word 0,0就省了
                 break;
@@ -131,7 +134,7 @@ class OamSuct{
                     break;
                 }
             }
-            ouf<<"\t.dw "<<oamLabel<<"OAM"<<k<<hex<<setiosflags(ios::uppercase)
+            ouf<<"\t.dw "<<oamLabel<<"OAM"<<h<<hex<<setiosflags(ios::uppercase)
             <<"\t\t\t;"<<(om[k-1].oamOffset^0x8000000)<<endl;
             ouf<<"\t.dw 0x"<<hex<<setiosflags(ios::uppercase)<<om[h-1].oamFrames<<endl;
         }
