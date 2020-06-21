@@ -16,12 +16,12 @@ struct OamPart{
     uint16_t parts[][3];
 };
 
-bool compare(const OamMain &O1,const OamMain &O2){
-    return O1.oamOffset<O2.oamOffset;
-}
-bool myunique(const OamMain &O1,const OamMain &O2){
-    return O1.oamOffset==O2.oamOffset;
-}
+// bool compare(const OamMain &O1,const OamMain &O2){
+    // return O1.oamOffset<O2.oamOffset;
+// }
+// bool myunique(const OamMain &O1,const OamMain &O2){
+    // return O1.oamOffset==O2.oamOffset;
+// }
 
 class OamSuct{
     public:
@@ -30,6 +30,12 @@ class OamSuct{
     string shortRomName;
     uint32_t oamOffset;
     string oamLabel;
+	OamSuct(){
+		romName="mf.gba";
+		romPath="";
+		shortRomName="mf";
+		fileExistInspect(romName);
+	}
     OamSuct(string rom):romName(rom){
         fileExistInspect(romName);
     }
@@ -43,7 +49,8 @@ class OamSuct{
     }
     void fileExistInspect(string s){
         if(access(s.c_str(),0)==-1){
-            throw "错误! 文件: \""+romName+"\"不存在!";
+            // throw "错误! 文件: \""+romName+"\"不存在!";
+			throw string("OAMSuct v1.0 2020/6/16 by XXXXXX-Diwa");
         }
         size_t pos=s.find_last_of('\\');
         if(pos>0&&pos!=string::npos){
@@ -99,7 +106,6 @@ class OamSuct{
         vector<OamMain> om;
         string s=romPath+shortRomName+"_oam_out.asm";
         uint32_t bit32;
-        uint16_t bit16;
         ifstream inf(romName,ios::in|ios::binary);
         if(inf.fail()){
             throw "错误! 文件: \""+romName+"\"无法读取!";
@@ -127,22 +133,34 @@ class OamSuct{
         OamPart *oampart=(OamPart*)malloc(sizeof(OamPart)+sizeof(uint16_t)*3*255);
         ouf<<".align\n"<<oamLabel<<"OAM:\t\t\t;"<<hex<<setiosflags(ios::uppercase)
         <<oamOffset<<endl;
-        for(uint32_t k=1;k<=om.size();++k){
-            uint32_t h=1;
-            for(;h<=k;++h){
-                if(om[k-1].oamOffset==om[h-1].oamOffset){
+		vector<OamMain>cpom(om.begin(),om.begin()+1);
+        // sort(cpom.begin(),cpom.end(),compare);
+        // cpom.erase(unique(cpom.begin(),cpom.end(),myunique),cpom.end());
+		for(uint32_t k=1;k<om.size();++k){
+			for(uint32_t t=0;t<cpom.size();++t){
+				if(om[k].oamOffset==cpom[t].oamOffset){
+					break;
+				}else if(t==cpom.size()-1){
+					cpom.push_back(om[k]);
+					break;
+				}
+			}
+		}
+        for(uint32_t k=0;k<om.size();++k){
+			uint32_t h=0;
+            for(;h<cpom.size();++h){
+                if(om[k].oamOffset==cpom[h].oamOffset){
                     break;
                 }
             }
-            ouf<<"\t.dw "<<oamLabel<<"OAM"<<h<<hex<<setiosflags(ios::uppercase)
-            <<"\t\t\t;"<<(om[k-1].oamOffset^0x8000000)<<endl;
-            ouf<<"\t.dw 0x"<<hex<<setiosflags(ios::uppercase)<<om[h-1].oamFrames<<endl;
+            ouf<<"\t.dw "<<oamLabel<<"OAM"<<hex<<setiosflags(ios::uppercase)<<h+1
+            <<"\t\t\t;"<<(om[k].oamOffset^0x8000000)<<endl;
+            ouf<<"\t.dw 0x"<<hex<<setiosflags(ios::uppercase)<<cpom[h].oamFrames<<endl;
         }
         ouf<<"\t.dw 0,0"<<endl;
-        sort(om.begin(),om.end(),compare);
-        om.erase(unique(om.begin(),om.end(),myunique),om.end());
-        for(uint32_t k=1;k<=om.size();++k){
-            bit32=om[k-1].oamOffset^0x8000000;
+		
+        for(uint32_t k=1;k<=cpom.size();++k){
+            bit32=cpom[k-1].oamOffset^0x8000000;
             inf.seekg(bit32);
             inf.read((char*)oampart,sizeof(OamPart)+sizeof(uint16_t)*3*255);
             ouf<<oamLabel<<"OAM"<<k<<":\t\t\t;"<<hex<<setiosflags(ios::uppercase)
@@ -166,7 +184,11 @@ int main(int argc,char *const argv[]){
     try{
         OamSuct *os;
         if(argc==1){
-            throw string("OAMSuct v1.0 2020/6/16 by XXXXXX-Diwa");
+            os=new OamSuct();
+            cout<<"请输入OAM地址: ";
+            os->oamOffset=os->getOffset();
+            cout<<"请输入OAMLabel: ";
+            os->oamLabel=os->getOneStr();
         }else if(argc==2){
             os=new OamSuct(argv[1]);
             cout<<"请输入OAM地址: ";
