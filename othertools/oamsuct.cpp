@@ -102,15 +102,35 @@ class OamSuct{
         ss>>str;
         throw "错误! 不正常的OAM数据! 地址: "+str; 
     }
+	
+	string &getOutFileRoute(string &s){
+		size_t pos=s.find_first_of('\"');
+		if(pos>0&&pos!=string::npos){
+			if(s.substr(0,pos)=="outFileRoute="){
+				s=s.substr(pos+1,s.size()-pos-2);
+				fileExistInspect(s);
+				return s;
+			}
+		}
+		throw string("错误! 配置文件outfile.ini数据异常!");
+	}
     void SuckOAM(){
         vector<OamMain> om;
-        string s=romPath+shortRomName+"_oam_out.asm";
+        string s;//=romPath+shortRomName+"_oam_out.asm";
         uint32_t bit32;
-        ifstream inf(romName,ios::in|ios::binary);
+		ifstream inf("outfile.ini",ios::in);
+		if(inf.fail()){
+			throw string("错误! 缺少配置文件outfile.ini!");
+		}
+		getline(inf,s);
+		getOutFileRoute(s);
+		inf.close();
+		inf.clear();
+        inf.open(romName,ios::in|ios::binary);
         if(inf.fail()){
             throw "错误! 文件: \""+romName+"\"无法读取!";
         }
-        ofstream ouf(s,ios::out);
+        ofstream ouf(s,ios::out|ios::app);
         if(ouf.fail()){
             throw "错误! 文件: \""+s+"\"无法创建!";
         }
@@ -172,6 +192,7 @@ class OamSuct{
                 <<",0x"<<setw(4)<<oampart->parts[h][2]<<endl;
             }
         }
+		ouf<<endl;
         free((OamPart*)oampart);
         inf.close();
         ouf.close();

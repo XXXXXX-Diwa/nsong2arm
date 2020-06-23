@@ -11,7 +11,7 @@ int main(){
 			exit(1);
 	}
 	while(true){
-		int i=system("arm Abandoned.asm");
+		int i=system("arm Abandoned.asm -erroronwarning");
 		if(!i){
 			break;
 		}

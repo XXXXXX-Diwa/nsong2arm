@@ -3,17 +3,46 @@
 #include <iomanip>
 #include <fstream>
 #include <vector>
+#include <io.h>
 using namespace std;
 
 int main(){
-	ifstream inf("mf.gba",ios::in|ios::binary);
+	string s;
+	ifstream inf("outfile.ini",ios::in);
 	if(inf.fail()){
 		cerr<<"speedsuct v1.0 2020/6/19 by XXXXXX-Diwa";
 		cin.get();
 		exit(1);
 	}
+	getline(inf,s);
+	size_t pos=s.find_first_of('\"');
+	if(pos>0&&pos!=string::npos&&s.substr(0,pos)=="outFileRoute="){
+		s=s.substr(pos+1,s.size()-pos-2);
+		if(access(s.c_str(),0)==-1){
+			cerr<<"目标文件: "+s+"不存在";
+			cin.get();
+			exit(1);
+		}
+	}else{
+		cerr<<"配置文件数据错误!";
+		cin.get();
+		exit(1);
+	}
+	inf.close();
+	inf.clear();
+	ofstream ouf(s,ios::out|ios::app);
+	if(ouf.fail()){
+		cerr<<"无法打开文件: "+s;
+		cin.get();
+		exit(1);
+	}
+	inf.open("mf.gba",ios::in|ios::binary);
+	if(inf.fail()){
+		cerr<<"缺少文件: mf.gba";
+		cin.get();
+		exit(1);
+	}
 	cout<<"请输入地址: ";
-	string s;
 	cin>>s;
 	cin.get();
 	cin.clear();
@@ -28,12 +57,8 @@ int main(){
 	ss<<s;
 	uint32_t offset;
 	ss>>hex>>setiosflags(ios::uppercase)>>offset;
-	ofstream ouf("mf_speed_out.asm",ios::out);
-	if(ouf.fail()){
-		cerr<<"无法创建文件: \"mf_speed_out.asm!";
-		cin.get();
-		exit(1);
-	}
+	
+	
 	int len=500;
 	bool twiceJump=false;
 	bool twicetry=false;
@@ -63,6 +88,7 @@ int main(){
 			}
 		}
 		if(twiceJump){
+			ouf<<endl;
 			break;
 		}else if(twicetry){
 			cerr<<"仍旧没有找到数据结尾!"<<endl;
