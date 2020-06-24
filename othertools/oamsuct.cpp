@@ -224,6 +224,7 @@ int main(int argc,char *const argv[]){
             os=new OamSuct(argv[1],argv[2],argv[3]);
         }
         os->SuckOAM();
+		delete os;
     }catch(string es){
         cerr<<es<<endl;
         cin.get();
