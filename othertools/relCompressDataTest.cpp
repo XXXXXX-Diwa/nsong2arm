@@ -17,7 +17,7 @@ using namespace std;
 *第二字节首次遇到00那么下一个字节就是新首字节,会根据此字节切换单双
 
 **/
-
+//数据块的首尾在rom中可以不与4对齐,甚至不用与2对齐
 int main(int argc,char *const argv[]){
 	ios::sync_with_stdio(false);
 	try{
