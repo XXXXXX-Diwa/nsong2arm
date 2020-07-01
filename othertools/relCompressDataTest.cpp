@@ -53,6 +53,8 @@ int main(int argc,char *const argv[]){
 					ut8=inf.get();//此处可能转为2bit类型,只要该值不为1
 					//2bit类型的第二字节和第三字节同时为0才会结束,故结尾为00 00
 					//但若维持1bit类型,则第二个字节再次为0就会结束
+					cout<<"ut8"<<hex<<int(ut8);
+					cin.get();
 					
 				}else if((bit1&0x80)==0){
 					total+=bit1;
@@ -73,11 +75,12 @@ int main(int argc,char *const argv[]){
 					cout<<"总数为: "<<hex<<int(total)<<endl;
 					// cin.get();
 				}
+				if(swibit) cin.get();
 			}else{
-				bit1=inf.get();
+				bit16=inf.get();
 				byte8=inf.get();
-
-				bit16=(bit1<<8)|byte8;
+				bit16<<=8;
+				bit16|=byte8;
 				cout<<"合并的第二个字节为: "<<hex<<int(bit16)<<endl;
 				// cin.get();
 				if(bit16==0){
@@ -87,15 +90,16 @@ int main(int argc,char *const argv[]){
 					}
 					cout<<"在位置: "<<hex<<inf.tellg()<<"处切换"<<endl;
 					swibit=true;
+					ut8=inf.get();
 					
-				}else if((bit16&0x8000)==0){
+				}else if((bit16&0x8000)==0){//不重复
 					total+=bit16;
 					inf.seekg(bit16,ios::cur);
 					cout<<"第二个字节打印了"<<hex<<int(bit16)<<"个字节"<<endl;
 					cout<<"下个第二字节读取地址为: "<<hex<<inf.tellg()<<endl;
 					cout<<"总数为: "<<hex<<int(total)<<endl;
 					// cin.get();
-				}else{
+				}else{//重复
 					bit16^=0x8000;
 					if(bit16==0){
 						continue;
