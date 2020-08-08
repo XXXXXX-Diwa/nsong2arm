@@ -44,17 +44,17 @@ int main(int argc,char *const argv[]){
 				if(bit1==0){
 					if(swibit){
 						cout<<"在位置: "<<hex<<inf.tellg()<<"处结束!"<<endl;
-						cin.get();
+						// cin.get();
 						break;
 					}
 					cout<<"在位置: "<<hex<<inf.tellg()<<"处切换"<<endl;
-					cin.get();
+					// cin.get();
 					swibit=true;
 					ut8=inf.get();//此处可能转为2bit类型,只要该值不为1
 					//2bit类型的第二字节和第三字节同时为0才会结束,故结尾为00 00
 					//但若维持1bit类型,则第二个字节再次为0就会结束
 					cout<<"ut8"<<hex<<int(ut8);
-					cin.get();
+					// cin.get();
 					
 				}else if((bit1&0x80)==0){
 					total+=bit1;
@@ -75,7 +75,8 @@ int main(int argc,char *const argv[]){
 					cout<<"总数为: "<<hex<<int(total)<<endl;
 					// cin.get();
 				}
-				if(swibit) cin.get();
+				// if(swibit) 
+					// cin.get();
 			}else{
 				bit16=inf.get();
 				byte8=inf.get();

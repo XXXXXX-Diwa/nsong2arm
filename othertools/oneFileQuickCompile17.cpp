@@ -32,7 +32,7 @@ int main(int argc,char* argv[]){
 			system("cls");
 		}else if(c=='r'||c=='R'){
 			system("cls");
-			s="g++ -Wall -std=c++11 -O2 "+string(argv[1])+" -o "+OnlyFileName(argv[1]);
+			s="g++ -Wall -std=c++17 -O2 "+string(argv[1])+" -o "+OnlyFileName(argv[1]);
 		}else{
 			break;
 		}

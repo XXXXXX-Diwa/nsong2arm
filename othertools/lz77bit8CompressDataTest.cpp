@@ -41,7 +41,7 @@ int main(int argc,char *const argv[]){
 		uint32_t definelen;
 		uint8_t bit1,byte8,len;
 		uint16_t bit16;
-		inf.seekg(4,ios::beg);
+		// inf.seekg(4,ios::beg);
 		inf.read((char*)&definelen,4);
 		definelen>>=8;
 		cout<<"解压总长度为: "<<hex<<int(definelen)<<endl;
